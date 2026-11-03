@@ -52,6 +52,19 @@
     <button class="btn btn-primary" id="pairedDone">Done</button>
   </section>
 
+  <section class="screen dash" id="dash" hidden>
+    <div class="dash-head">
+      <div class="dash-clock" id="dashClock"><span class="dash-time" id="dashTime">09:41</span><span class="dash-date t-quiet" id="dashDate">Tuesday 3 November</span></div>
+      <div class="dash-home"><span class="t-heading" id="dashName">Home</span><span class="t-quiet" id="dashCount">No devices yet</span></div>
+    </div>
+    <div class="dash-empty" id="dashEmpty">
+      <div class="dash-empty-box" id="dashEmptyIcon"></div>
+      <p class="t-title">Nothing here yet</p>
+      <p class="t-body">Add a device from the Homie app on your phone and it will appear here.</p>
+    </div>
+    <div class="dash-grid" id="dashGrid"></div>
+  </section>
+
   <section class="screen" id="error" hidden>
     <p class="t-title">Homie can't connect right now</p>
     <p class="t-body" id="errorText">Check this device is online, then try again.</p>
@@ -62,6 +75,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
+<script src="dash.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

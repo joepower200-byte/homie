@@ -63,7 +63,7 @@
     </div>
     <div class="panel">
       <div class="panel-main"><svg class="tick" viewBox="0 0 96 96" width="96" height="96" aria-hidden="true"><circle cx="48" cy="48" r="46"/><path d="M30 49.5l12 12 24-26"/></svg></div>
-      <div class="panel-buttons"><button class="btn btn-secondary" id="pairAnother">Pair another device</button></div>
+      <div class="panel-buttons"><button class="btn btn-primary" id="pairedOpen">Set up your display</button></div>
     </div>
   </section>
 
@@ -78,10 +78,66 @@
     </div>
   </section>
 
+  <!-- Dashboard editor: what the display shows, arranged from the phone -->
+  <section class="screen page" id="home" hidden>
+    <div class="page-head">
+      <div><p class="t-phone-heading left" id="homeName">Home</p><p class="t-quiet small" id="homeStatus">Showing on your display</p></div>
+      <button class="chip" id="arrangeToggle">Arrange</button>
+    </div>
+    <div class="page-body">
+      <div class="list" id="deviceList"></div>
+      <div class="list-empty" id="listEmpty"><p class="t-quiet">No devices yet. Add your first one below and watch it appear on the display.</p></div>
+    </div>
+    <div class="panel bar">
+      <button class="btn btn-primary" id="addDevice">Add a device</button>
+      <button class="btn btn-secondary" id="openCustomise">Customise display</button>
+    </div>
+  </section>
+
+  <section class="screen page" id="add" hidden>
+    <div class="page-head">
+      <div><p class="t-phone-heading left">Add a device</p><p class="t-quiet small">Pick what you want on the display</p></div>
+      <button class="chip" id="addBack">Cancel</button>
+    </div>
+    <div class="page-body"><div class="catalogue" id="catalogue"></div><p class="t-quiet small centre">Demo devices for now. Real connections come later.</p></div>
+  </section>
+
+  <section class="screen page" id="edit" hidden>
+    <div class="page-head">
+      <div><p class="t-phone-heading left" id="editTitle">Device</p><p class="t-quiet small" id="editKind">Changes show on the display as you make them</p></div>
+      <button class="chip" id="editDone">Done</button>
+    </div>
+    <div class="page-body">
+      <div class="field"><label class="t-quiet small" for="editName">Name</label><input class="input" id="editName" maxlength="24" autocomplete="off"></div>
+      <div class="field"><label class="t-quiet small" for="editRoom">Room</label><input class="input" id="editRoom" maxlength="24" autocomplete="off" list="rooms"><datalist id="rooms"><option>Living room</option><option>Kitchen</option><option>Bedroom</option><option>Bathroom</option><option>Hallway</option><option>Office</option><option>Garden</option></datalist></div>
+      <div class="field"><span class="t-quiet small">Tile size</span><div class="seg" id="editSize"><button data-v="s">Small</button><button data-v="w">Wide</button><button data-v="l">Large</button></div></div>
+      <div class="field row" id="editOnRow"><span class="t-quiet small">Power</span><button class="switch" id="editOn" role="switch" aria-checked="false"><i></i></button></div>
+      <div class="field" id="editLevelRow"><div class="row"><span class="t-quiet small" id="editLevelLabel">Brightness</span><span class="t-quiet small" id="editLevelVal">80%</span></div><input class="range" type="range" id="editLevel" min="0" max="100" step="5"></div>
+      <div class="field row" id="editTempRow"><span class="t-quiet small">Temperature</span><div class="stepper"><button id="tempDown" aria-label="Lower">−</button><span class="stepper-val" id="editTemp">21°</span><button id="tempUp" aria-label="Raise">+</button></div></div>
+      <button class="link-danger" id="editRemove">Remove from display</button>
+    </div>
+  </section>
+
+  <section class="screen page" id="customise" hidden>
+    <div class="page-head">
+      <div><p class="t-phone-heading left">Customise</p><p class="t-quiet small">How the display looks</p></div>
+      <button class="chip" id="customiseDone">Done</button>
+    </div>
+    <div class="page-body">
+      <div class="field"><label class="t-quiet small" for="custName">Display name</label><input class="input" id="custName" maxlength="24" autocomplete="off"></div>
+      <div class="field"><span class="t-quiet small">Theme</span><div class="seg" id="custMode"><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+      <div class="field"><span class="t-quiet small">Accent colour</span><div class="swatches" id="custAccent"></div></div>
+      <div class="field"><span class="t-quiet small">Tile corners</span><div class="seg" id="custCorners"><button data-v="round">Round</button><button data-v="soft">Soft</button><button data-v="square">Square</button></div></div>
+      <div class="field row"><span class="t-quiet small">Show the clock</span><button class="switch" id="custClock" role="switch" aria-checked="true"><i></i></button></div>
+      <button class="link-danger" id="unpair">Unpair this display</button>
+    </div>
+  </section>
+
 </div>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
+<script src="dash.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
