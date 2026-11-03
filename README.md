@@ -8,7 +8,9 @@ The devices are still demo devices. Real integrations come in a later phase.
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The whole app: display, customise panel, ambient mode, QR linking and the phone remote. |
+| `index.html` | The wall display: dashboard, customise panel, ambient mode, and the first-run "Set up with your phone" screen. |
+| `phone.html` | The Homie phone app (installable): built-in QR scanner, set up a display, control your home. |
+| `phone.webmanifest`, `sw.js`, `icon-*.png`, `apple-touch-icon.png` | What makes the phone app installable, with its icon. |
 | `config.js` | Two settings from Supabase, the service that keeps both screens in sync. |
 | `schema.sql` | Sets up the Supabase database. You run it once. |
 
@@ -29,6 +31,15 @@ The devices are still demo devices. Real integrations come in a later phase.
 1. Open the address on the iPad. Add it to the home screen for a full-screen display.
 2. Tap **Pair phone**, scan the QR code with your phone's camera and tap the link.
 3. Check the four digits match and tap **Yes, they match** on the phone.
+
+## Using the phone app
+
+1. On your phone, open `https://joepower200-byte.github.io/homie/phone.html`. In Safari tap **Share → Add to Home Screen**. Homie now has its own icon.
+2. Open the Homie app. It creates your home with the demo devices.
+3. Open the website on a new iPad. It shows **Set up with your phone** and a QR code.
+4. In the app, tap **Set up or link a display**, point it at the code, pick the room and tap **Set up display**. The iPad loads your home.
+
+The same button also scans the **Pair phone** code on a display that's already set up, which links the app to that display's home.
 
 ## How it works
 

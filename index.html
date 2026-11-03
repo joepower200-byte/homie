@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#12151c">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Homie">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 </head>
 <body>
 <title>Homie Display</title>
@@ -287,6 +292,30 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .pbig{height:52px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px}
 .pghost{height:48px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:600}
 
+/* First-run display setup */
+.setup{position:fixed;inset:0;z-index:30;background:#0c0e13;color:#f1f2f5;overflow:hidden}
+.setup canvas{position:absolute;inset:0;width:100%;height:100%}
+.setup .qrwrap{top:42%}
+.setup-cap{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;flex-direction:column;gap:8px;padding:24px max(28px, env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(28px, env(safe-area-inset-left,0px));text-shadow:0 1px 10px rgba(0,0,0,.5)}
+.setup-cap .tag{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa0ad}
+.setup-cap h1{margin:0;font-family:var(--font-display);font-weight:500;font-size:clamp(28px,4.5vw,44px);letter-spacing:-.02em}
+.setup-cap p{margin:0;color:#c3c8d2;font-size:16px;max-width:52ch}
+.setup-cap .small{font-size:14px;color:#9aa0ad}
+.setup-cap .linkbtn{color:#9aa0ad;align-self:flex-start;margin-top:4px}
+/* Phone app: scanner and actions */
+.pactions{display:grid;gap:10px}
+.pactions button{display:flex;align-items:center;justify-content:center;gap:8px}
+.linked.off{color:var(--muted)}
+.install{border-style:dashed}
+.install .x{width:32px;height:32px;background:transparent}
+.scanner{position:fixed;inset:0;z-index:90;background:#000;color:#fff;display:flex;flex-direction:column}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-frame{position:absolute;left:50%;top:42%;width:min(70vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:28px;box-shadow:0 0 0 200vmax rgba(0,0,0,.45);outline:3px solid rgba(255,255,255,.9);outline-offset:-3px}
+.scan-cap{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:8px;padding:20px max(20px, env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(20px, env(safe-area-inset-left,0px));text-align:center}
+.scan-cap b{font-size:17px}
+.scan-cap span{font-size:14px;color:#d0d4dc;min-height:2.6em}
+.scan-cap .pghost{background:rgba(255,255,255,.14);color:#fff;border-color:transparent}
+
 /* Ambient */
 .ambient{position:fixed;inset:0;z-index:60;background:var(--wall);color:var(--amb-ink,rgba(0,0,0,.42));display:flex;flex-direction:column;justify-content:flex-end;padding:calc(40px + env(safe-area-inset-top,0px)) max(40px, env(safe-area-inset-right,0px)) calc(48px + env(safe-area-inset-bottom,0px)) max(40px, env(safe-area-inset-left,0px));gap:6px;overflow:hidden;cursor:pointer;transition:background 1s}
 .ambient::before{content:"";position:absolute;width:90vmax;height:90vmax;left:-20vmax;top:-30vmax;border-radius:50%;background:radial-gradient(closest-side,rgba(255,250,235,.22),transparent);pointer-events:none}
@@ -353,6 +382,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="config.js"></script>
 <script>
 (function(){
@@ -383,7 +413,8 @@ const P = {
   hide:'<path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 9 6 9 6a16 16 0 0 1-2.8 3.3M6.4 7.6C4.2 9.2 3 12 3 12s4 6 9 6a8.6 8.6 0 0 0 4-1"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   cloud:'<path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.6 4.2 4.2 0 0 1 17.5 18H7zM9 21l1-2M13 21l1-2"/>',
-  gauge:'<path d="M4 17a8 8 0 1 1 16 0M12 17l4-5"/>'
+  gauge:'<path d="M4 17a8 8 0 1 1 16 0M12 17l4-5"/>',
+  scan:'<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16"/>'
 };
 const ic = (n, cls) => `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -453,17 +484,21 @@ const ART_URL = 'https://claude.ai/artifact/YCkQHVSMYk2yyTnrUF1Vkg';
 const CFG = window.HOMIE_CONFIG || null;
 const SITE = !!(CFG && CFG.supabaseUrl && CFG.supabaseAnonKey && !/YOUR-/.test(CFG.supabaseUrl) && window.supabase);
 const SITE_URL = location.origin + location.pathname;
+const SITE_BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
+const PHONE_URL = SITE_BASE + 'phone.html';
+const FORCE_PHONE = !!window.HOMIE_PHONE_APP;
 /* Each home gets a private random ID. The display makes one; the phone learns it from the QR code. */
 let HOME = null;
 (function(){
   const h = (location.hash || '').slice(1), m = /^pair-([a-z0-9]{6,})-([a-z0-9]{6,})$/.exec(h);
   try { HOME = localStorage.getItem('homie-home'); } catch(e){}
   if (m) HOME = m[1];
-  if (!HOME && !/^(phone|pair-)/.test(h)){ const a = 'abcdefghjkmnpqrstuvwxyz23456789', r = new Uint32Array(12); crypto.getRandomValues(r); HOME = Array.from(r, v => a[v % a.length]).join(''); }
+  const phoneish = FORCE_PHONE || /^(phone|setup-)/.test(h);
+  if (!HOME && phoneish){ const a = 'abcdefghjkmnpqrstuvwxyz23456789', r = new Uint32Array(12); crypto.getRandomValues(r); HOME = Array.from(r, v => a[v % a.length]).join(''); }
   try { if (HOME) localStorage.setItem('homie-home', HOME); } catch(e){}
 })();
 const ROUTE = (location.hash || '').slice(1);
-const PHONE_MODE = ROUTE === 'phone' || ROUTE.indexOf('pair-') === 0;
+const PHONE_MODE = ROUTE === 'phone' || ROUTE.indexOf('pair-') === 0 || ROUTE.indexOf('setup-') === 0 || !!window.HOMIE_PHONE_APP;
 const SYNC_TYPES = ['light','plug','climate','vehicle'];
 const STATE_KEYS = ['id','type','name','room','on','bri','watts','target','current','mode','model','battery','limit','charging','locked','pre'];
 let DB = null, synced = false;
@@ -937,7 +972,8 @@ function drawCustomise(){
       ${sw('motion','Animations')}
       ${sw('lite','Lightweight mode','For older tablets. Turns off blur, glow and motion. Switches on by itself on browsers that are too old for the full design.')}
       <label class="label" for="nameIn">Greeting name</label><input class="text" id="nameIn" value="${esc(S.name)}" maxlength="24"></div>
-    <div class="field"><span class="label">Start over</span><div id="resetBox"><button class="danger" data-c="reset">Reset dashboard to the demo</button></div></div>
+    <div class="field"><span class="label">Start over</span><div id="resetBox"><button class="danger" data-c="reset">Reset dashboard to the demo</button></div>
+      ${SITE ? `<div id="resetupBox"><button class="danger" data-c="resetup">Set up this display again with a phone</button></div>` : ''}</div>
   </aside>`;
   const sh = $('layer').querySelector('.sheet'); sh.scrollTop = keepScroll;
 }
@@ -948,6 +984,8 @@ $('layer').addEventListener('click', e => {
   if (k === 'reset'){ $('resetBox').innerHTML = `<p class="note">This puts back the demo devices and default look.</p><div class="tools"><button class="btn primary" data-c="reset-yes">Reset</button><button class="btn" data-c="reset-no">Keep my setup</button></div>`; return; }
   if (k === 'reset-yes'){ S = defaults(); S.liteSet = true; save(); renderAll(); drawCustomise(); toast('Dashboard reset'); return; }
   if (k === 'reset-no'){ drawCustomise(); return; }
+  if (k === 'resetup'){ $('resetupBox').innerHTML = `<p class="note">This display forgets its home and shows a QR code. Your devices stay safe in your home; scan the code with the Homie app to bring them back.</p><div class="tools"><button class="btn primary" data-c="resetup-yes">Set up again</button><button class="btn" data-c="reset-no">Cancel</button></div>`; return; }
+  if (k === 'resetup-yes'){ try { localStorage.removeItem('homie-home'); localStorage.removeItem('homie-proto-v1'); } catch(e){} location.hash = ''; location.reload(); return; }
   if (['motion','lite','ambientIdle'].includes(k)){ S[k] = !S[k]; if (k==='lite') S.liteSet = true; }
   else if (k === 'accent') S.accent = v || null;
   else S[k] = v;
@@ -1037,9 +1075,9 @@ function qrFor(text){
 function startRealPair(){
   cleanupReal();
   const code = newCode();
-  Object.assign(PZ, {mode: 'real', step: 'qr', pcode: code, code: codeDigits(code), qr: qrFor(SITE ? SITE_URL + '#pair-' + HOME + '-' + code : ART_URL + '#pair-' + code), seed: (Math.random() * 2**31) | 0});
+  Object.assign(PZ, {mode: 'real', step: 'qr', pcode: code, code: codeDigits(code), qr: qrFor(SITE ? PHONE_URL + '#pair-' + HOME + '-' + code : ART_URL + '#pair-' + code), seed: (Math.random() * 2**31) | 0});
   const ref = DB.collection('pairings').doc(code);
-  ref.set({status: 'waiting', display: 'Kitchen display', createdAt: Date.now()}).then(() => {
+  ref.set({status: 'waiting', display: S.displayName || 'Kitchen display', createdAt: Date.now()}).then(() => {
     if (!PZ || PZ.pcode !== code) return;
     PZ.unsub = ref.onSnapshot(s => {
       if (!PZ || PZ.pcode !== code || !s.exists) return;
@@ -1061,7 +1099,7 @@ function cleanupReal(){
 function stopPair(){ if (PZ){ cancelAnimationFrame(PZ.raf); cleanupReal(); PZ = null; } }
 function wallCap(){
   const st = PZ.step;
-  if (PZ.mode === 'real' && st === 'qr') return `<span class="tag">Kitchen display · link a phone</span><h3>Scan this code with your phone's camera</h3><p>It opens Homie on your phone and links it to this display.</p>`;
+  if (PZ.mode === 'real' && st === 'qr') return `<span class="tag">${esc(S.displayName || 'Kitchen display')} · link a phone</span><h3>Scan this code with your phone's camera</h3><p>It opens Homie on your phone and links it to this display.</p>`;
   if (PZ.mode === 'real' && st === 'confirm') return `<span class="tag">${esc(PZ.phone || 'Phone')} found</span><h3>Check your phone shows these four digits</h3><p>Then tap “Yes, they match” on the phone. This makes sure you're linking to this display and not one nearby.</p>`;
   if (st === 'show') return `<span class="tag">Kitchen display · set up</span><h3>Point your phone's camera at this screen</h3><p>Open homie.app on your phone and tap Pair. No codes or passwords to type.</p>`;
   if (st === 'scan') return `<span class="tag">Phone found</span><h3>Reading the pattern…</h3><p>Hold steady for a moment.</p>`;
@@ -1255,8 +1293,8 @@ function phoneMain(){
   $('app').hidden = true; applyTheme();
   const root = document.createElement('div'); root.id = 'phoneApp'; root.className = 'papp';
   document.body.insertBefore(root, $('layer'));
-  PH = {root: root, room: 'all', devs: [], rooms: defaults().rooms, ready: false, slow: false, subbed: false, display: 'Kitchen display'};
-  try { const l = JSON.parse(localStorage.getItem('homie-phone') || 'null'); if (l && l.display) PH.display = l.display; } catch(e){}
+  PH = {root: root, room: 'all', devs: [], rooms: defaults().rooms, ready: false, slow: false, subbed: false, display: 'Kitchen display', hasDisplay: false, setupRoom: 'Kitchen'};
+  try { const l = JSON.parse(localStorage.getItem('homie-phone') || 'null'); if (l && l.display){ PH.display = l.display; PH.hasDisplay = true; } } catch(e){}
   phoneMsg('Connecting to your home…', '');
   getDb().then(db => {
     if (!db && SITE){ phoneMsg('Scan the code on your display', 'Tap Pair phone on your Homie display and scan the QR code with this phone. That links the phone to your home.'); return; }
@@ -1274,7 +1312,11 @@ function phoneMsg(title, body, extra){
 }
 function phoneRoute(){
   const r = (location.hash || '').slice(1);
-  if (r.indexOf('pair-') === 0) phonePair(r.slice(5).split('-').pop()); else phoneRemote();
+  const m = /^pair-([a-z0-9]+)-([a-z0-9]+)$/.exec(r);
+  if (m && SITE && m[1] !== HOME){ try { localStorage.setItem('homie-home', m[1]); } catch(e){} location.reload(); return; }
+  if (r.indexOf('pair-') === 0) phonePair(r.slice(5).split('-').pop());
+  else if (r.indexOf('setup-') === 0) phoneSetup(r.slice(6));
+  else phoneRemote();
 }
 async function phonePair(code){
   phoneMsg('Finding the display…', '');
@@ -1297,6 +1339,7 @@ async function phonePair(code){
     <button class="pghost" data-ph="no">They don't match</button></div>`;
 }
 function phoneLinked(){
+  PH.hasDisplay = true;
   try { localStorage.setItem('homie-phone', JSON.stringify({display: PH.display, at: Date.now()})); } catch(e){}
   try { history.replaceState(null, '', '#phone'); } catch(e){}
   PH.root.innerHTML = '';
@@ -1310,6 +1353,11 @@ function phoneRemote(){
       if (snap.metadata.fromCache && snap.empty) return;
       clearTimeout(slow); PH.slow = false; PH.ready = true;
       PH.devs = snap.docs.map(x => Object.assign({}, x.data(), {id: x.id})).filter(d => SYNC_TYPES.indexOf(d.type) >= 0);
+      if (SITE && snap.empty && !PH.seeded){
+        PH.seeded = true; const base = defaults();
+        base.devices.forEach(d => writeDev(d, 'phone'));
+        DB.doc('home/rooms').set({list: base.rooms}).catch(() => {});
+      }
       if (PH.dragging) PH.stale = true; else phoneRender();
     }, () => { clearTimeout(slow); PH.ready = true; PH.err = true; phoneRender(); });
     DB.doc('home/rooms').onSnapshot(s => { if (s.exists && Array.isArray(s.data().list)) { PH.rooms = s.data().list; phoneRender(); } }, () => {});
@@ -1343,9 +1391,11 @@ function phoneRender(){
   else body = list.map(pCard).join('');
   const added = k => PH.devs.some(d => d.id === 'x-' + k);
   PH.root.innerHTML = `<div class="pscreen">
-    <header class="phead"><div class="brand"><span class="mark" aria-hidden="true">h</span>Homie</div><span class="linked"><i></i>${esc(PH.display)} linked</span></header>
+    <header class="phead"><div class="brand"><span class="mark" aria-hidden="true">h</span>Homie</div>${PH.hasDisplay ? `<span class="linked"><i></i>${esc(PH.display)} linked</span>` : `<span class="linked off">No display yet</span>`}</header>
     <h1 class="ptitle">Your home</h1>
     <p class="psum">${PH.ready ? esc(sum) : ''}</p>
+    ${installCard()}
+    <div class="pactions"><button class="pbig" data-ph="scan">${ic('scan')}Set up or link a display</button></div>
     <nav class="rooms" aria-label="Rooms">${tabs.map(r => `<button class="room" aria-selected="${sel === r.id}" data-ph="room" data-room="${esc(r.id)}">${esc(r.name)}</button>`).join('')}</nav>
     <div class="plist">${body}</div>
     <section class="psec"><h2 class="label">Add a device</h2><p class="note">Found on your network. These are demo devices for now.</p>
@@ -1387,7 +1437,11 @@ async function phoneClick(e){
     return;
   }
   if (a === 'no'){ DB.collection('pairings').doc(PH.code).update({status: 'rejected'}).catch(() => {}); phoneMsg('Nothing was linked', 'The display will show a fresh code. Scan it again when you are standing in front of it.'); return; }
-  if (a === 'remote'){ phoneLinked(); return; }
+  if (a === 'remote'){ if (PH.code || PH.hasDisplay) phoneLinked(); else { try { history.replaceState(null, '', '#phone'); } catch(e){} PH.root.innerHTML = ''; phoneRemote(); } return; }
+  if (a === 'scan'){ openScanner(); return; }
+  if (a === 'setroom'){ PH.setupRoom = el.dataset.v; PH.root.querySelectorAll('[data-ph="setroom"]').forEach(b => b.setAttribute('aria-pressed', b === el)); return; }
+  if (a === 'claim'){ claimDisplay(el); return; }
+  if (a === 'hideinstall'){ try { localStorage.setItem('homie-install-hint', '1'); } catch(e){} phoneRender(); return; }
   if (a === 'room'){ PH.room = el.dataset.room; phoneRender(); return; }
   if (a === 'theme'){ S.theme = el.dataset.v; applyTheme(); phoneRender(); DB.doc('home/display').set({theme: el.dataset.v, by: 'phone', at: Date.now()}).catch(() => toast("Couldn't change the display's theme.")); return; }
   if (a === 'add'){
@@ -1411,6 +1465,158 @@ async function phoneClick(e){
   else return;
   writeDev(d, 'phone'); phoneRender();
 }
+/* ---- Phone app: set up a new display ---- */
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+function installCard(){
+  let hidden = false; try { hidden = !!localStorage.getItem('homie-install-hint'); } catch(e){}
+  if (!SITE || isStandalone() || hidden) return '';
+  const ios = /iPhone|iPad/.test(navigator.userAgent);
+  return `<div class="pcard install"><div class="prow"><img src="icon-192.png" alt="" width="40" height="40" style="border-radius:10px"><div class="pinfo"><b>Install the Homie app</b><small>${ios ? 'Tap Share, then “Add to Home Screen”.' : 'Open the browser menu, then “Install app” or “Add to Home screen”.'}</small></div><button class="x" data-ph="hideinstall" aria-label="Hide">${ic('close','sm')}</button></div></div>`;
+}
+let SETUP = null;
+async function phoneSetup(code){
+  phoneMsg('Finding the display…', '');
+  if (!SITE){ phoneMsg('Open the Homie app', 'Setting up a display works in the Homie app on your phone.'); return; }
+  const sdb = supaDb('setup-' + code), ref = sdb.doc('display/info');
+  let s; try { s = await ref.get(); } catch(e){ phoneMsg("Couldn't reach the display", 'Check your connection and scan again.'); return; }
+  const d = s.exists ? s.data() : null;
+  if (!d || d.status !== 'waiting' || Date.now() - (d.createdAt || 0) > 30*60e3){
+    phoneMsg('This code has expired', 'Reload the page on the display to show a fresh code, then scan it again.', `<button class="pghost" data-ph="remote">Back to my home</button>`); return;
+  }
+  SETUP = {ref, code};
+  const rooms = ['Kitchen','Living room','Hallway','Bedroom','Office'];
+  PH.root.innerHTML = `<div class="pscreen pcenter">
+    <div class="brand"><span class="mark" aria-hidden="true">h</span>Homie</div>
+    <span class="label">New display found</span>
+    <h1>Set up this display with your home?</h1>
+    <p>It will show your devices, and anything you change on this phone appears on it straight away.</p>
+    <span class="label">Where is it?</span>
+    <div class="pthemes">${rooms.map(r => `<button data-ph="setroom" data-v="${r}" aria-pressed="${PH.setupRoom === r}">${r}</button>`).join('')}</div>
+    <button class="pbig" data-ph="claim">Set up display</button>
+    <button class="pghost" data-ph="remote">Not now</button></div>`;
+}
+async function claimDisplay(btn){
+  if (!SETUP) return;
+  btn.disabled = true; btn.textContent = 'Setting up…';
+  const name = PH.setupRoom + ' display';
+  try { await SETUP.ref.update({status: 'claimed', home: HOME, name: name, phone: phoneLabel(), at: Date.now()}); }
+  catch(e){ btn.disabled = false; btn.textContent = 'Set up display'; toast("Couldn't reach the display. Try again."); return; }
+  PH.display = name; PH.hasDisplay = true;
+  try { localStorage.setItem('homie-phone', JSON.stringify({display: name, at: Date.now()})); } catch(e){}
+  phoneMsg(`${name} is ready`, 'It is loading your home now. Everything you do here shows up on it.', `<button class="pbig" data-ph="remote">Open my home</button>`);
+}
+
+/* ---- Phone app: built-in QR scanner ---- */
+let SCAN = null;
+function closeScanner(){
+  if (!SCAN) return;
+  cancelAnimationFrame(SCAN.raf);
+  if (SCAN.stream) SCAN.stream.getTracks().forEach(t => t.stop());
+  SCAN.el.remove(); SCAN = null;
+}
+function homieTarget(text){
+  const m = /#((?:pair-[a-z0-9]+-[a-z0-9]+)|(?:setup-[a-z0-9]+))\s*$/.exec(String(text || ''));
+  return m ? m[1] : null;
+}
+async function openScanner(){
+  closeScanner();
+  const el = document.createElement('div'); el.className = 'scanner'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Scan a Homie code');
+  el.innerHTML = `<video playsinline muted autoplay></video><div class="scan-frame" aria-hidden="true"></div>
+    <div class="scan-cap"><b>Point at the code on your display</b><span id="scanMsg">Starting the camera…</span><button class="pghost" data-scan="close">Cancel</button></div>`;
+  document.body.appendChild(el);
+  SCAN = {el, raf: 0, stream: null};
+  el.addEventListener('click', e => { if (e.target.closest('[data-scan="close"]')) closeScanner(); });
+  const msg = t => { const m = el.querySelector('#scanMsg'); if (m) m.textContent = t; };
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ msg("This browser can't use the camera here. Scan the code with your phone's Camera app instead."); return; }
+  try { SCAN.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false}); }
+  catch(e){ msg(e && e.name === 'NotAllowedError' ? 'Camera access is turned off for Homie. Allow it in your phone settings, or scan with the Camera app.' : "The camera couldn't start. Scan with your phone's Camera app instead."); return; }
+  if (!SCAN) { return; }
+  const v = el.querySelector('video'); v.srcObject = SCAN.stream;
+  try { await v.play(); } catch(e){}
+  msg('Hold steady…');
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d', {willReadFrequently: true});
+  const detector = ('BarcodeDetector' in window) ? new BarcodeDetector({formats: ['qr_code']}) : null;
+  let busy = false, warned = 0;
+  const step = async () => {
+    if (!SCAN) return;
+    if (!busy && v.readyState >= 2 && v.videoWidth){
+      busy = true;
+      let text = null;
+      try {
+        if (detector){ const r = await detector.detect(v); if (r && r[0]) text = r[0].rawValue; }
+        else if (window.jsQR){
+          const w = Math.min(720, v.videoWidth), h = Math.round(v.videoHeight * w / v.videoWidth);
+          cv.width = w; cv.height = h; ctx.drawImage(v, 0, 0, w, h);
+          const r = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, {inversionAttempts: 'dontInvert'});
+          if (r) text = r.data;
+        }
+      } catch(e){}
+      busy = false;
+      if (text){
+        const t = homieTarget(text);
+        if (t){ closeScanner(); if (navigator.vibrate) navigator.vibrate(30); location.hash = t; return; }
+        if (Date.now() - warned > 2500){ warned = Date.now(); msg("That isn't a Homie code. Point at the code on your display."); }
+      }
+    }
+    if (SCAN) SCAN.raf = requestAnimationFrame(step);
+  };
+  step();
+}
+
+/* ---- Display: first-run setup screen ---- */
+function displaySetup(){
+  $('app').hidden = true;
+  const code = newCode(), url = PHONE_URL + '#setup-' + code;
+  const el = document.createElement('div'); el.className = 'setup';
+  const qr = qrFor(url);
+  el.innerHTML = `<canvas id="setupCv" aria-hidden="true"></canvas>
+    <div class="qrwrap"><div class="qr">${qr ? `<img src="${qr}" alt="QR code to set up this display">` : `<p>Open ${esc(PHONE_URL)} on your phone.</p>`}</div></div>
+    <div class="setup-cap" id="setupCap">
+      <span class="tag">New display</span>
+      <h1>Set up with your phone</h1>
+      <p>Open the Homie app on your phone, tap <b>Set up a display</b> and point it at this code.</p>
+      <p class="small">No app yet? Scan the code with your phone's camera to get started.</p>
+      <button class="linkbtn" id="setupSolo">Use this display on its own</button>
+    </div>`;
+  document.body.insertBefore(el, $('layer'));
+  const cv = el.querySelector('#setupCv'), t0 = performance.now();
+  let done = 0;
+  const still = !S.motion || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const loop = () => {
+    const [w, h, dpr] = fit(cv), ctx = cv.getContext('2d'), t = still ? 0 : (performance.now() - t0)/1000, rgb = accentRGB();
+    ctx.clearRect(0, 0, w, h);
+    const R = Math.min(w, h) * .44, cx = w/2, cy = h*.42;
+    if (done){
+      const k = Math.min(1, (performance.now() - done)/500);
+      ctx.globalAlpha = .25; drawPattern(ctx, cx, cy, R, t*.3, 7, 0, rgb); ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.fillStyle = '#5fcf8f'; ctx.arc(cx, cy, R*.28*k, 0, Math.PI*2); ctx.fill();
+    } else drawPattern(ctx, cx, cy, R, t, 7, 0, rgb);
+    const q = el.querySelector('.qr'); if (q && !done){ const px = Math.round(Math.min(w, h)/dpr*.36) + 'px'; if (q.style.width !== px) q.style.width = px; }
+    requestAnimationFrame(loop);
+  };
+  loop();
+  el.querySelector('#setupSolo').addEventListener('click', () => {
+    const a = 'abcdefghjkmnpqrstuvwxyz23456789', r = new Uint32Array(12); crypto.getRandomValues(r);
+    try { localStorage.setItem('homie-home', Array.from(r, v => a[v % a.length]).join('')); } catch(e){}
+    location.reload();
+  });
+  if (!SITE) return;
+  const ref = supaDb('setup-' + code).doc('display/info');
+  ref.set({status: 'waiting', createdAt: Date.now()}).catch(() => {
+    const p = el.querySelector('.small'); if (p) p.textContent = "Can't reach Homie right now. Check the Wi-Fi, then reload this page.";
+  });
+  ref.onSnapshot(s => {
+    const d = s.exists ? s.data() : null;
+    if (!d || d.status !== 'claimed' || !d.home || done) return;
+    done = performance.now();
+    S.displayName = d.name || 'Kitchen display'; S.paired = d.phone || 'Phone'; S.room = 'all';
+    try { localStorage.setItem('homie-home', d.home); localStorage.setItem('homie-proto-v1', JSON.stringify(S)); } catch(e){}
+    const q = el.querySelector('.qrwrap'); if (q) q.remove();
+    el.querySelector('#setupCap').innerHTML = `<span class="tag">Set up by ${esc(d.phone || 'your phone')}</span><h1>${esc(S.displayName)} is ready</h1><p>Loading your home…</p>`;
+    setTimeout(() => location.reload(), 1800);
+  }, () => {});
+}
+
 function phoneInput(e){
   if (e.target.dataset.ph !== 'bri') return;
   const card = e.target.closest('[data-id]'), d = PH.devs.find(x => x.id === card.dataset.id); if (!d) return;
@@ -1421,11 +1627,13 @@ function phoneInput(e){
 }
 
 if (PHONE_MODE){ phoneMain(); }
+else if (SITE && !HOME){ applyTheme(); displaySetup(); }
 else {
   renderAll(); clock();
   getDb().then(db => { if (!db) return; DB = db; subscribeDisplay(); });
 }
 })();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 
 </body>
