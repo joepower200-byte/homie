@@ -1,0 +1,109 @@
+/* Homie pairing. Every size, colour and position below comes from the Figma file
+   (iPad Pro 11" frames at 1194 x 834, iPhone 17 frame at 402 x 874).
+   Each screen is laid out on a stage at the design's exact size, then scaled to fit the device. */
+
+@font-face { font-family: "Geist"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/geist-400.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-weight: 500; font-style: normal; font-display: swap; src: url("fonts/geist-500.woff2") format("woff2"); }
+@font-face { font-family: "Cooper Hewitt"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/cooper-hewitt-600.woff2") format("woff2"); }
+
+:root {
+  --blue: #1e8bff;
+  --blue-soft: #c7e2ff;
+  --ink: #171717;
+  --ink-2: #2f2f2f;
+  --ink-soft: rgba(47, 47, 47, 0.43);
+  --grey: #a3a3a3;
+  --ground: #f3f3f3;
+  --ground-line: #e4e4e4;
+  --card: #fafafa;
+  --card-line: rgba(0, 0, 0, 0.11);
+  --geist: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --cooper: "Cooper Hewitt", "Geist", ui-sans-serif, system-ui, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--ground); font-family: var(--geist); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+body[data-mode="phone"] { background: var(--card); }
+button { font: inherit; border: 0; padding: 0; background: none; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.stage { position: absolute; left: 50%; top: 50%; transform-origin: center center; }
+.stage[data-w="1194"] { width: 1194px; height: 834px; background: var(--ground); box-shadow: inset 0 0 0 0.5px var(--ground-line); }
+.stage[data-w="402"] { width: 402px; height: 874px; background: var(--card); }
+.screen { position: absolute; inset: 0; }
+.screen > * { position: absolute; margin: 0; }
+
+/* Shared type styles */
+.t-title { font-family: var(--geist); font-weight: 500; font-size: 24px; line-height: 33px; letter-spacing: -0.312px; color: var(--ink); text-align: center; }
+.t-heading { font-family: var(--cooper); font-weight: 600; font-size: 24px; line-height: 33px; letter-spacing: -0.312px; color: var(--ink-2); }
+.t-heading .accent { color: var(--blue); }
+.t-body { font-family: var(--geist); font-weight: 400; font-size: 16px; line-height: 33px; letter-spacing: -0.208px; color: var(--ink-soft); white-space: nowrap; }
+.t-quiet { font-family: var(--geist); font-weight: 400; font-size: 16px; line-height: 33px; letter-spacing: -0.208px; color: var(--grey); white-space: nowrap; }
+.t-phone-heading { font-family: var(--cooper); font-weight: 600; font-size: 18px; line-height: 27px; letter-spacing: -0.234px; color: var(--ink-2); text-align: center; }
+
+/* Buttons (Figma: Rectangle 1 / Rectangle 2) */
+.btn { height: 43px; border-radius: 12px; font-family: var(--geist); font-weight: 500; font-size: 19px; line-height: 33px; letter-spacing: -0.247px; text-align: center; transition: transform .12s ease, filter .12s ease; }
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-secondary { background: var(--blue-soft); color: var(--blue); }
+.btn[disabled] { filter: saturate(.4) opacity(.6); cursor: default; }
+
+/* iPad: start */
+#start .t-title { left: 379.5px; top: 343.5px; width: 435px; }
+#start .btn-row { left: 414.5px; top: 447.5px; display: flex; gap: 7px; }
+#start .btn-primary { width: 233px; }
+#start .btn-secondary { width: 125px; }
+
+/* iPad: scan the QR code (Figma "iPad Pro 11 - 3") */
+#scan .card { left: 32px; top: 32px; width: 597px; height: 770px; background: var(--card); border: 0.5px solid var(--card-line); border-radius: 25px; }
+#scan .t-heading { left: 81px; top: 359px; width: 365px; }
+#scan .t-body { left: 81px; top: 442px; }
+#scan .manual { left: 81px; top: 720px; display: flex; align-items: center; gap: 0; }
+#scan .manual .t-quiet { display: block; }
+#scan .chev { position: absolute; left: 114px; top: 13px; width: 5px; height: 9px; }
+#scan .qr-box { left: 740px; top: 262px; width: 310px; height: 310px; border: 1px dashed var(--card-line); border-radius: 25px; }
+#scan .qr { left: 752px; top: 274px; width: 286px; height: 286px; }
+#scan .qr svg { display: block; width: 286px; height: 286px; }
+#scan .manual-code { left: 740px; top: 262px; width: 310px; height: 310px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+
+/* Code text (Figma "452 - 229") */
+.code { font-family: var(--cooper); font-weight: 600; font-size: 64px; line-height: 77px; letter-spacing: -0.832px; white-space: nowrap;
+  background: linear-gradient(to bottom, #a3a3a3, rgba(47, 47, 47, 0.5)); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; }
+
+/* iPad: confirm (Figma "iPad Pro 11 - 4") */
+#confirm .t-body { left: 441px; top: 277px; width: 312px; text-align: center; }
+#confirm .code-box { left: 424px; top: 329px; width: 346px; height: 177px; background: var(--card); border: 1px dashed var(--grey); border-radius: 25px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05); }
+#confirm .code { left: 424px; top: 329px; width: 346px; height: 177px; display: flex; align-items: center; justify-content: center; }
+
+/* iPad: paired */
+#paired .t-title, #error .t-title { left: 379.5px; top: 327px; width: 435px; }
+#paired .t-body, #error .t-body { left: 0; width: 1194px; top: 393px; text-align: center; }
+#paired .btn, #error .btn { left: 538.5px; top: 464px; width: 117px; }
+
+/* Phone: scanner (Figma "iPhone 17 - 1") */
+.p-heading { left: 50px; top: 199px; width: 301px; }
+.p-sub { left: 0; width: 402px; top: 262px; text-align: center; }
+.camera { left: 17px; top: 487px; width: 368px; height: 368px; background: #fff; border: 0.5px solid var(--card-line); border-radius: 40px; overflow: hidden; }
+.camera video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.camera .cam-note { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 40px; text-align: center; }
+.camera .cam-note .t-quiet { white-space: normal; line-height: 24px; }
+.p-alt { left: 0; width: 402px; top: 432px; text-align: center; }
+.p-alt button { color: var(--grey); }
+
+/* Phone: enter the code by hand */
+.p-input { left: 28px; top: 487px; width: 346px; height: 177px; border: 1px dashed var(--grey); border-radius: 25px; background: var(--card); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  font-family: var(--cooper); font-weight: 600; font-size: 56px; letter-spacing: 6px; text-align: center; color: var(--ink-2); padding: 0; }
+.p-input::placeholder { color: #d4d4d4; }
+
+/* Phone: confirm and result */
+.p-code-box { left: 28px; top: 487px; width: 346px; height: 177px; background: var(--card); border: 1px dashed var(--grey); border-radius: 25px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center; }
+.p-code-box .code { position: static; }
+.p-buttons { left: 28px; top: 700px; width: 346px; display: flex; flex-direction: column; gap: 10px; }
+.p-buttons .btn { width: 100%; }
+
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink-2); color: #fff; font-family: var(--geist); font-size: 15px; line-height: 20px; padding: 10px 16px; border-radius: 12px; max-width: calc(100% - 32px); text-align: center; z-index: 10; }
+
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
