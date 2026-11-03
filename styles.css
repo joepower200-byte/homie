@@ -83,27 +83,80 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outl
 #paired .t-body, #error .t-body { left: 0; width: 1194px; top: 393px; text-align: center; }
 #paired .btn, #error .btn { left: 538.5px; top: 464px; width: 117px; }
 
-/* Phone: scanner (Figma "iPhone 17 - 1") */
-.p-heading { left: 50px; top: 199px; width: 301px; }
-.p-sub { left: 0; width: 402px; top: 262px; text-align: center; }
-.camera { left: 17px; top: 487px; width: 368px; height: 368px; background: #fff; border: 0.5px solid var(--card-line); border-radius: 40px; overflow: hidden; }
-.camera video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.camera .cam-note { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 40px; text-align: center; }
+/* Phone: fluid layout. The bottom panel (camera, code, buttons) is inset evenly from the screen edges,
+   and its corner radius is the iPhone's own screen-corner radius minus that inset, so the curves run parallel.
+   app.js switches to square-cornered values on phones without rounded screens. */
+body[data-mode="phone"] {
+  --edge: 12px;            /* gap between panel and screen edge, same on all three sides */
+  --screen-r: 58px;        /* typical Face ID iPhone screen-corner radius */
+  --panel-r: calc(var(--screen-r) - var(--edge));
+  --pad: 16px;             /* padding inside the panel */
+  --btn-r: max(12px, calc(var(--panel-r) - var(--pad)));   /* buttons stay concentric with the panel */
+  --panel-h: min(calc(100vw - 2 * var(--edge)), 58vh);
+}
+body[data-mode="phone"].square-screen { --screen-r: 26px; --edge: 10px; }
+.phone-root { position: fixed; inset: 0; overflow: hidden; }
+.phone-root .screen > * { position: absolute; margin: 0; }
+.top { left: 0; right: 0; top: env(safe-area-inset-top, 0px); bottom: calc(var(--panel-h) + var(--edge) + 48px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 0 50px; text-align: center; }
+.top p { margin: 0; }
+.top .t-phone-heading { max-width: 301px; }
+.top .t-quiet { line-height: 24px; white-space: normal; }
+.alt { left: 0; right: 0; bottom: calc(var(--panel-h) + var(--edge) + 12px); text-align: center; }
+.alt button { color: var(--grey); padding: 4px 10px; }
+.panel { left: var(--edge); right: var(--edge); bottom: var(--edge); height: var(--panel-h); border-radius: var(--panel-r);
+  background: #fff; border: 0.5px solid var(--card-line); overflow: hidden; display: flex; flex-direction: column; }
+.panel-main { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.panel-buttons { display: flex; flex-direction: column; gap: 8px; padding: 0 var(--pad) var(--pad); }
+.panel-buttons .btn { width: 100%; height: 54px; border-radius: var(--btn-r); }
+.panel .code { font-size: 60px; }
+.code.soft { opacity: .5; }
+
+/* Camera */
+.camera video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease; }
+.camera.live video { opacity: 1; }
+.camera .cam-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 40px; text-align: center; }
 .camera .cam-note .t-quiet { white-space: normal; line-height: 24px; }
-.p-alt { left: 0; width: 402px; top: 432px; text-align: center; }
-.p-alt button { color: var(--grey); }
+.reticle { position: absolute; left: 50%; top: 50%; width: 58%; aspect-ratio: 1; transform: translate(-50%, -50%); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.reticle i { position: absolute; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.9); transition: border-color .3s ease; }
+.camera:not(.live) .reticle i { border-color: #d4d4d4; }
+.reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 14px; }
+.reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 14px; }
+.reticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 14px; }
+.reticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 14px; }
+.camera.found .reticle { transform: translate(-50%, -50%) scale(.9); }
+.camera.found .reticle i { border-color: var(--blue); }
 
-/* Phone: enter the code by hand */
-.p-input { left: 28px; top: 487px; width: 346px; height: 177px; border: 1px dashed var(--grey); border-radius: 25px; background: var(--card); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-  font-family: var(--cooper); font-weight: 600; font-size: 56px; letter-spacing: 6px; text-align: center; color: var(--ink-2); padding: 0; }
-.p-input::placeholder { color: #d4d4d4; }
+/* Typed code */
+.p-input { width: 100%; border: 0; background: transparent; font-family: var(--cooper); font-weight: 600; font-size: 56px; letter-spacing: 4px; text-align: center; color: var(--ink-2); padding: 0; outline: none; }
+.p-input::placeholder { color: #dcdcdc; }
 
-/* Phone: confirm and result */
-.p-code-box { left: 28px; top: 487px; width: 346px; height: 177px; background: var(--card); border: 1px dashed var(--grey); border-radius: 25px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center; }
-.p-code-box .code { position: static; }
-.p-buttons { left: 28px; top: 700px; width: 346px; display: flex; flex-direction: column; gap: 10px; }
-.p-buttons .btn { width: 100%; }
+/* Paired tick */
+.tick circle { fill: var(--blue); }
+.tick path { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 64; stroke-dashoffset: 0; }
 
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink-2); color: #fff; font-family: var(--geist); font-size: 15px; line-height: 20px; padding: 10px 16px; border-radius: 12px; max-width: calc(100% - 32px); text-align: center; z-index: 10; }
 
-@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+/* Gentle motion. Screens ease in with their parts arriving one after another. */
+.btn { transition: transform .15s ease, filter .2s ease, background-color .2s ease; }
+@media (prefers-reduced-motion: no-preference) {
+  .screen.enter > * { animation: rise .62s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+  .screen.leave { animation: fade-out .2s ease both; }
+  .phone-root .screen.enter > .panel { animation-name: rise-panel; animation-duration: .7s; }
+  #scan .qr-box { animation: breathe 3.2s ease-in-out infinite; }
+  .screen.enter .qr svg { animation: qr-in .8s cubic-bezier(.2,.8,.2,1) .15s both; }
+  .screen.enter .code { animation: code-in .8s cubic-bezier(.2,.8,.2,1) .18s both; }
+  .camera.live:not(.found) .reticle { animation: reticle 2.6s ease-in-out infinite; }
+  .screen.enter .tick circle { animation: tick-pop .55s cubic-bezier(.2,.9,.3,1.3) .2s both; transform-origin: 48px 48px; }
+  .screen.enter .tick path { animation: tick-draw .45s ease-out .55s both; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes rise-panel { from { opacity: 0; transform: translateY(24px); } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes breathe { 50% { border-color: rgba(0, 0, 0, 0.2); } }
+@keyframes qr-in { from { opacity: 0; transform: scale(.96); } }
+@keyframes code-in { from { opacity: 0; transform: translateY(6px); letter-spacing: 4px; } }
+@keyframes reticle { 50% { transform: translate(-50%, -50%) scale(1.04); } }
+@keyframes tick-pop { from { transform: scale(.4); opacity: 0; } }
+@keyframes tick-draw { from { stroke-dashoffset: 64; } }
+

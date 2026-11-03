@@ -13,47 +13,69 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preload" href="fonts/geist-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/geist-500.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/cooper-hewitt-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body data-mode="phone">
-<div class="stage" data-w="402" data-h="874">
+<div class="phone-root">
 
   <section class="screen" id="scan">
-    <p class="t-phone-heading p-heading">Point your camera at the QR code on the other device.</p>
-    <p class="t-quiet p-sub">We will then connect it automatically</p>
-    <p class="t-quiet p-alt"><button id="typeCode">Enter code instead</button></p>
-    <div class="camera" id="camera">
+    <div class="top">
+      <p class="t-phone-heading">Point your camera at the QR code on the other device.</p>
+      <p class="t-quiet">We will then connect it automatically</p>
+    </div>
+    <p class="alt t-quiet"><button id="typeCode">Enter code instead</button></p>
+    <div class="panel camera" id="camera">
       <video id="video" playsinline muted autoplay></video>
+      <div class="reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="cam-note" id="camNote" hidden><span class="t-quiet" id="camNoteText">Allow camera access to scan</span></div>
     </div>
   </section>
 
   <section class="screen" id="manual" hidden>
-    <p class="t-phone-heading p-heading">Type the code shown on the other device.</p>
-    <p class="t-quiet p-sub">It's under “Enter manually” on the display</p>
-    <p class="t-quiet p-alt"><button id="backToScan">Scan the QR code instead</button></p>
-    <input class="p-input" id="codeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000 000" aria-label="Six-digit code">
-    <div class="p-buttons" style="top:700px"><button class="btn btn-primary" id="codeGo" disabled>Pair</button></div>
+    <div class="top">
+      <p class="t-phone-heading">Type the code shown on the other device.</p>
+      <p class="t-quiet">It's under “Enter manually” on the display</p>
+    </div>
+    <p class="alt t-quiet"><button id="backToScan">Scan the QR code instead</button></p>
+    <div class="panel">
+      <div class="panel-main"><input class="p-input" id="codeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000 000" aria-label="Six-digit code"></div>
+      <div class="panel-buttons"><button class="btn btn-primary" id="codeGo" disabled>Pair</button></div>
+    </div>
   </section>
 
   <section class="screen" id="confirm" hidden>
-    <p class="t-phone-heading p-heading">Check this code matches the one on your display.</p>
-    <p class="t-quiet p-sub">Then tap Confirm to finish pairing</p>
-    <div class="p-code-box"><span class="code" id="confirmCode">000 - 000</span></div>
-    <div class="p-buttons"><button class="btn btn-primary" id="confirmYes">Confirm</button><button class="btn btn-secondary" id="confirmNo">It doesn't match</button></div>
+    <div class="top">
+      <p class="t-phone-heading">Check this code matches the one on your display.</p>
+      <p class="t-quiet">Then tap Confirm to finish pairing</p>
+    </div>
+    <div class="panel">
+      <div class="panel-main"><span class="code" id="confirmCode">000 - 000</span></div>
+      <div class="panel-buttons"><button class="btn btn-primary" id="confirmYes">Confirm</button><button class="btn btn-secondary" id="confirmNo">It doesn't match</button></div>
+    </div>
   </section>
 
   <section class="screen" id="paired" hidden>
-    <p class="t-phone-heading p-heading" id="pairedTitle">Your display is paired.</p>
-    <p class="t-quiet p-sub">You can now set it up from this phone</p>
-    <div class="p-buttons" style="top:487px"><button class="btn btn-secondary" id="pairAnother">Pair another device</button></div>
+    <div class="top">
+      <p class="t-phone-heading" id="pairedTitle">Your display is paired.</p>
+      <p class="t-quiet">You can now set it up from this phone</p>
+    </div>
+    <div class="panel">
+      <div class="panel-main"><svg class="tick" viewBox="0 0 96 96" width="96" height="96" aria-hidden="true"><circle cx="48" cy="48" r="46"/><path d="M30 49.5l12 12 24-26"/></svg></div>
+      <div class="panel-buttons"><button class="btn btn-secondary" id="pairAnother">Pair another device</button></div>
+    </div>
   </section>
 
   <section class="screen" id="error" hidden>
-    <p class="t-phone-heading p-heading" id="errorTitle">This code has expired.</p>
-    <p class="t-quiet p-sub" id="errorText">Show a new code on the display and scan again</p>
-    <div class="p-buttons" style="top:487px"><button class="btn btn-primary" id="errorRetry">Scan again</button></div>
+    <div class="top">
+      <p class="t-phone-heading" id="errorTitle">This code has expired.</p>
+      <p class="t-quiet" id="errorText">Show a new code on the display and scan again</p>
+    </div>
+    <div class="panel">
+      <div class="panel-main"><span class="code soft">—</span></div>
+      <div class="panel-buttons"><button class="btn btn-primary" id="errorRetry">Scan again</button></div>
+    </div>
   </section>
 
 </div>

@@ -14,6 +14,7 @@
   /* ---------- Layout: scale the design-sized stage to fit the screen ---------- */
   var stage = document.querySelector(".stage");
   function fit() {
+    if (!stage) return;
     var w = +stage.getAttribute("data-w"), h = +stage.getAttribute("data-h");
     var s = Math.min(window.innerWidth / w, window.innerHeight / h);
     stage.style.transform = "translate(-50%, -50%) scale(" + s + ")";
@@ -21,9 +22,32 @@
   window.addEventListener("resize", fit);
   fit();
 
+  /* Screen changes: the old screen fades out, the new one eases in part by part. */
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var current = null, pending = null;
   function show(id) {
-    var screens = document.querySelectorAll(".screen");
-    for (var i = 0; i < screens.length; i++) screens[i].hidden = screens[i].id !== id;
+    var next = $(id);
+    if (pending) { clearTimeout(pending.t); pending.run(); }
+    if (current === next) return;
+    var prev = current; current = next;
+    var run = function () {
+      pending = null;
+      var all = document.querySelectorAll(".screen");
+      for (var i = 0; i < all.length; i++) if (all[i] !== next) { all[i].hidden = true; all[i].classList.remove("leave", "enter"); }
+      for (var j = 0; j < next.children.length; j++) next.children[j].style.setProperty("--i", j);
+      next.classList.remove("enter"); next.hidden = false; void next.offsetWidth; next.classList.add("enter");
+    };
+    if (prev && !prev.hidden && !reduced) { prev.classList.add("leave"); pending = { run: run, t: setTimeout(run, 200) }; }
+    else run();
+  }
+  /* Phones without rounded screen corners (e.g. iPhone SE) get squarer panels. */
+  if (MODE === "phone") {
+    var probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
+    document.body.appendChild(probe);
+    var rounded = probe.offsetHeight > 0 || !/iPhone|iPad|Android/.test(navigator.userAgent);
+    probe.remove();
+    if (!rounded) document.body.classList.add("square-screen");
   }
   var toastTimer;
   function toast(msg) {
@@ -157,8 +181,10 @@
       stopCamera();
       camNote("");
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { camNote("This browser can't use the camera. Tap “Enter code instead”."); return; }
+      $("camera").classList.remove("live", "found");
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }).then(function (stream) {
         P.stream = stream; video.srcObject = stream;
+        video.onplaying = function () { $("camera").classList.add("live"); };
         var p = video.play(); if (p && p.catch) p.catch(function () {});
         P.scanning = true; scanLoop();
       }).catch(function (e) {
@@ -171,7 +197,12 @@
     var busy = false, lastWarn = 0;
     var handleText = function (text) {
       var m = /#pair-(\d{6})\s*$/.exec(String(text || ""));
-      if (m) { stopCamera(); if (navigator.vibrate) navigator.vibrate(30); join(m[1]); return true; }
+      if (m) {
+        P.scanning = false; $("camera").classList.add("found");
+        if (navigator.vibrate) navigator.vibrate(30);
+        setTimeout(function () { stopCamera(); join(m[1]); }, reduced ? 0 : 450);
+        return true;
+      }
       if (Date.now() - lastWarn > 3000) { lastWarn = Date.now(); toast("That isn't a Homie code."); }
       return false;
     };
