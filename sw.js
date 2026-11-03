@@ -1,5 +1,5 @@
 // Lets the phone app install. Network first, so updates appear straight away.
-const CACHE = 'homie-pair-v2';
+const CACHE = 'homie-pair-v3';
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./phone.html', './styles.css', './app.js', './config.js', './dash.js'])).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {

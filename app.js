@@ -140,6 +140,7 @@
           }
           if (s.status === "paired" && D.state !== "paired") {
             D.state = "paired";
+            if (s.home && s.home !== homeId) { homeId = s.home; store.set("homie-home", homeId); }
             $("pairedTitle").textContent = "Paired with your " + (s.phone || "phone");
             show("paired");
             D.stop();
@@ -304,7 +305,7 @@
           fail("This code has expired.", "Show a new code on the display and scan again"); return;
         }
         var confirm = randomDigits(6);
-        P.home = s.home || null;
+        P.home = s.home || randomDigits(10);
         return writeSession(code, { status: "joined", createdAt: s.createdAt, home: s.home, confirm: confirm, phone: deviceName(), joinedAt: Date.now() }).then(function () {
           $("confirmCode").textContent = confirm.slice(0, 3) + " - " + confirm.slice(3);
           P.confirm = confirm;
